@@ -1,0 +1,65 @@
+# C executables
+*
+!/**/
+!*.*
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# PDF files
+Recitation *
+dphpc_*
+
+*.out
+*.aux
+*.log
+*claude*
+.vscode/
+**/.vscode/
+
+*.png
+*.csv
+*.dat
+
+*.tex
+*.toc
+
+# PDF exercise guides
+*.pdf
+
+# Personal notes
+anki_*

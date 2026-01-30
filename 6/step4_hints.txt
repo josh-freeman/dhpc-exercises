@@ -1,0 +1,75 @@
+Step 4 Hints - 2D Heat Diffusion with RMA Halo Exchange
+========================================================
+
+Only look at these when you're stuck!
+
+
+HINT 1: Creating a column datatype
+----------------------------------
+A column has 'local_nx' elements, each separated by 'grid_cols' elements.
+Use MPI_Type_vector to create a strided datatype.
+
+    MPI_Datatype col_type;
+    MPI_Type_vector(local_nx, 1, grid_cols, MPI_DOUBLE, &col_type);
+    MPI_Type_commit(&col_type);
+
+
+HINT 2: Top/bottom row exchange (contiguous data)
+-------------------------------------------------
+Put my top interior row (row 1) to upper neighbor's bottom ghost (row local_nx+1):
+
+    if (up != MPI_PROC_NULL) {
+        MPI_Put(&grid[IDX(1, 1, grid_cols)], local_ny, MPI_DOUBLE,
+                up, IDX(local_nx + 1, 1, grid_cols), local_ny, MPI_DOUBLE, win);
+    }
+
+Put my bottom interior row (row local_nx) to lower neighbor's top ghost (row 0):
+
+    if (down != MPI_PROC_NULL) {
+        MPI_Put(&grid[IDX(local_nx, 1, grid_cols)], local_ny, MPI_DOUBLE,
+                down, IDX(0, 1, grid_cols), local_ny, MPI_DOUBLE, win);
+    }
+
+
+HINT 3: Left/right column exchange (non-contiguous, use col_type)
+-----------------------------------------------------------------
+Put my left interior column (col 1) to left neighbor's right ghost (col local_ny+1):
+
+    if (left != MPI_PROC_NULL) {
+        MPI_Put(&grid[IDX(1, 1, grid_cols)], 1, col_type,
+                left, IDX(1, local_ny + 1, grid_cols), 1, col_type, win);
+    }
+
+Put my right interior column (col local_ny) to right neighbor's left ghost (col 0):
+
+    if (right != MPI_PROC_NULL) {
+        MPI_Put(&grid[IDX(1, local_ny, grid_cols)], 1, col_type,
+                right, IDX(1, 0, grid_cols), 1, col_type, win);
+    }
+
+
+HINT 4: Heat equation stencil
+-----------------------------
+Apply the 5-point stencil to interior points:
+
+    grid_new[i][j] = grid[i][j] + alpha * dt / (dx*dx) *
+                (grid[i-1][j] + grid[i+1][j] + grid[i][j-1] + grid[i][j+1] - 4*grid[i][j])
+
+    for (int i = 1; i <= local_nx; i++) {
+        for (int j = 1; j <= local_ny; j++) {
+            double center = grid[IDX(i, j, grid_cols)];
+            double up_val = grid[IDX(i-1, j, grid_cols)];
+            double down_val = grid[IDX(i+1, j, grid_cols)];
+            double left_val = grid[IDX(i, j-1, grid_cols)];
+            double right_val = grid[IDX(i, j+1, grid_cols)];
+
+            grid_new[IDX(i, j, grid_cols)] = center +
+                ALPHA * DT / (DX * DX) *
+                (up_val + down_val + left_val + right_val - 4.0 * center);
+        }
+    }
+
+
+HINT 5: Don't forget cleanup
+----------------------------
+When you create the col_type, uncomment the MPI_Type_free at the end.

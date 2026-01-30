@@ -58,7 +58,9 @@ int main(int argc, char** argv) {
         double* tmp = T1; T1 = T2; T2 = tmp;
     }
     tsc = stop_tsc(tsc);
-    printf("{\"cycles\": %lld}\n", tsc);
+    double checksum = 0.0;
+    for (int i = 0; i < N * M; i++) checksum += T1[i];
+    printf("{\"cycles\": %lld, \"checksum\": %.10e}\n", tsc, checksum);
     free(T1);
     free(T2);
 }

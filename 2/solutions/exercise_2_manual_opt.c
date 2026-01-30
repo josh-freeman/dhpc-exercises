@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
+#define NUM_THREADS 2
 
 static long num_steps = 100000000;
 double step;
@@ -12,10 +13,11 @@ int main(int argc, char **argv)
 
     double start_time, run_time;
     step = 1.0 / (double)num_steps;
+    omp_set_num_threads(NUM_THREADS);
     start_time = omp_get_wtime();
-    int num_threads = 100;
+    int num_threads = omp_get_num_threads();
     double pi = 0.0, sums[num_threads];
-    omp_set_num_threads(num_threads);
+
 #pragma omp parallel
     {
         int i, id = omp_get_thread_num();
